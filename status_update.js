@@ -1,4 +1,3 @@
-const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
 
@@ -47,10 +46,29 @@ function validateFilename(fileName) {
   return [dd, mm, yyyy];
 }
 
-function logStatusUpdate(update, { dd, mm, yyyy }) {
+function logStatusUpdate(logContent, { dd, mm, yyyy }) {
   const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][mm];
-  const logs = update.split('\n').filter(x => !!x.trim()).map(x => `* ${x}`).join('\n');
-  const message = `Update for ${dd}-${month}-${yyyy}\n\n${logs}`
+  const logs = JSON.parse(logContent);
+  const header = `${'*'.repeat(10)}Update for ${dd}-${month}-${yyyy}${'*'.repeat(10)}\n`
+  const grouped = groupByRepository(logs);
 
-  console.log(message);
+  console.log(header);
+  grouped.forEach((logs, repositoryName) => {
+    console.log(`Repository: ${repositoryName}`);
+
+    logs.forEach(({ branchName, commitMessage }) => {
+      console.log(`Branch: ${branchName}`);
+      console.log(commitMessage);
+      console.log('\n')
+    });
+  });
+}
+
+function groupByRepository(logs) {
+  const map = new Map();
+  logs.forEach(log => {
+    const grouped = map.get(log.repositoryName) || [];
+    map.set(log.repositoryName, [...grouped, log]);
+  });
+  return map;
 }

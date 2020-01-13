@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/**
+ * Git hook to log commit messages to be later used for standup updates
+ */
+
 const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
@@ -14,9 +18,8 @@ const commitMessage = fs.readFileSync(process.argv[2]).toString().replace(/\n/g,
 (async function() {
   try {
     const branchName = await getCurrentBranchName();
-    logStatusUpdate(
-      `Committed "${commitMessage}" on branch "${branchName}"`,
-    );
+    const repositoryName = await getRepositoryName();
+    logStatusUpdate({ repositoryName, commitMessage, branchName });
   } catch (e) {
     console.log('failed to log status update');
     process.exit(0);
@@ -25,18 +28,19 @@ const commitMessage = fs.readFileSync(process.argv[2]).toString().replace(/\n/g,
 
 function getCurrentBranchName() {
   return new Promise((res, rej) => {
-    exec('git rev-parse --abbrev-ref HEAD', (err, stdout, stderr) => {
-      if (err) {
-        rej(err);
-        return;
-      }
-
-      res(stdout);
-    });
+    const command = 'git rev-parse --abbrev-ref HEAD';
+    exec(command, (err, stdout) => err ? rej(err) : res(stdout));
   });
 }
 
-function logStatusUpdate(message) {
+function getRepositoryName() {
+  return new Promise((res, rej) => {
+    const command = 'basename -s .git `git config --get remote.origin.url`';
+    exec(command, (err, stdout) => err ? rej(err) : res(stdout));
+  });
+}
+
+function logStatusUpdate(update) {
   if (!fs.existsSync(STATUS_UPDATE_DIR)){
     fs.mkdirSync(STATUS_UPDATE_DIR);
   }
@@ -51,5 +55,10 @@ function logStatusUpdate(message) {
   const filename = `${dd}${mm}${yyyy}`;
   const filepath = path.join(STATUS_UPDATE_DIR, filename);
 
-  fs.appendFileSync(filepath, message);
+  const updates = fs.existsSync(filepath)
+      ? JSON.parse(fs.readFileSync(filepath).toString())
+      : [];
+  updates.push(update)
+
+  fs.writeFileSync(filepath, JSON.stringify(updates));
 }
