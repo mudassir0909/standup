@@ -15,7 +15,7 @@ const commitMessage = fs.readFileSync(process.argv[2]).toString().replace(/\n/g,
   try {
     const branchName = await getCurrentBranchName();
     logStatusUpdate(
-      `Committed ${commitMessage} on branch ${branchName}`,
+      `Committed "${commitMessage}" on branch "${branchName}"`,
     );
   } catch (e) {
     console.log('failed to log status update');
