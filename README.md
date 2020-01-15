@@ -1,5 +1,5 @@
 # standup
-Generate status updates for standup from your commit messages
+Generate status updates from your commit messages using git commit hooks
 
 # Requirements
 * NodeJS (this was tested on `v10.16.3`)
@@ -19,11 +19,12 @@ standup() { node ~/path/to/standup/status_update.js }
 ```
 
 # Running
-
-Your commit messages are logged as you work, try to write meaningful enough messages so that when you read your "Friday commits" on Monday you should be able to get the context.
+Run the following command
 
  ```
-$ standup # or node ~/path/to/standup/status_update.js
+$ node ~/path/to/standup/status_update.js
+OR
+$ standup
 
 **********Update for 15-Jan-2020**********
 
@@ -40,3 +41,17 @@ Repository: epic-repository
 
     👉 Add .gitignore
  ```
+
+# How it works
+All your commit messages are stored inside `~/.statusupdate` folder, grouped by day.
+
+```
+$ ls ~/.statusupdate
+13002020 14002020 15002020
+```
+
+When you run `node ~/path/to/standup/status_update.js`, it find the recently modified file and outputs updates from it.
+
+# Todo
+– [ ] View updates by selected date
+- [ ] Auto clean updates older than 30(or N) days
