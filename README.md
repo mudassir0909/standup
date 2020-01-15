@@ -25,9 +25,18 @@ Your commit messages are logged as you work, try to write meaningful enough mess
  ```
 $ standup # or node ~/path/to/standup/status_update.js
 
-**********Update for 13-Jan-2020**********
+**********Update for 15-Jan-2020**********
 
-Repository: calmva
-Branch: foo/bar
-foo bar is foo
+Repository: epic-repository
+
+  Branch: mudassir/epic-branch
+
+    👉 Made a change
+    👉 Made another change
+    👉 Reverted both changes
+
+
+  Branch: mudassir/not-so-epic-branch
+
+    👉 Add .gitignore
  ```

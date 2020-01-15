@@ -47,28 +47,33 @@ function validateFilename(fileName) {
 }
 
 function logStatusUpdate(logContent, { dd, mm, yyyy }) {
+  const withIndentation = (str, times) => ' '.repeat(times) + str;
+
   const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][mm];
   const logs = JSON.parse(logContent);
   const header = `${'*'.repeat(10)}Update for ${dd}-${month}-${yyyy}${'*'.repeat(10)}\n`
-  const grouped = groupByRepository(logs);
+  const grouped = groupBy(logs, l => l.repositoryName);
 
   console.log(header);
   grouped.forEach((logs, repositoryName) => {
     console.log(`Repository: ${repositoryName}`);
 
-    logs.forEach(({ branchName, commitMessage }) => {
-      console.log(`Branch: ${branchName}`);
-      console.log(commitMessage);
-      console.log('\n')
+    groupBy(logs, l => l.branchName).forEach((ll, branchName) => {
+      console.log(withIndentation(`Branch: ${branchName}`, 2));
+      ll
+        .filter(l => !l.commitMessage.trim().startsWith('Merge branch'))
+        .forEach(l => console.log(withIndentation('👉 ' + l.commitMessage, 4)));
+
+      console.log('\n');
     });
   });
 }
 
-function groupByRepository(logs) {
-  const map = new Map();
-  logs.forEach(log => {
-    const grouped = map.get(log.repositoryName) || [];
-    map.set(log.repositoryName, [...grouped, log]);
-  });
-  return map;
+function groupBy(items, fn) {
+  return items.reduce((res, i) => {
+    const key = fn(i);
+    const grouped = res.get(key) || [];
+    res.set(key, [...grouped, i]);
+    return res;
+  }, new Map());
 }
