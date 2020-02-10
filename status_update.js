@@ -62,6 +62,7 @@ function logStatusUpdate(logContent, { dd, mm, yyyy }) {
       console.log(withIndentation(`Branch: ${branchName}`, 2));
       ll
         .filter(l => !l.commitMessage.trim().startsWith('Merge branch'))
+        .map(processCommits)
         .forEach(l => console.log(withIndentation('👉 ' + l.commitMessage, 4)));
 
       console.log('\n');
@@ -76,4 +77,16 @@ function groupBy(items, fn) {
     res.set(key, [...grouped, i]);
     return res;
   }, new Map());
+}
+
+function processCommits(c) {
+  if (c.commitMessage.length < 100) {
+    return c;
+  }
+
+  const { commitMessage } = c;
+  return {
+    ...c,
+    commitMessage: commitMessage.slice(0, 100) + '...',
+  };
 }
